@@ -1,5 +1,5 @@
 export interface ICpBaseRequest {
     collectionName: string;
-    action: 'findOne' | 'insertOne',
+    action: 'findOne'| 'find' | 'insertOne' | 'updateOne';
     data: any
 }

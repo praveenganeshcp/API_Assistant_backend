@@ -23,10 +23,20 @@ export async function cpBaseFunction(req: Request, response: Response) {
         console.log(JSON.stringify(data, undefined, 3));
         result = await collection[action](data);
     }
+    else if(action == 'find') {
+        console.log('Running findMany operation ...');
+        console.log(JSON.stringify(data, undefined, 3));
+        result = await collection[action](data).toArray();
+    }
     else if(action == 'insertOne') {
         console.log('Running insertOne operation ...');
         console.log(JSON.stringify(data, undefined, 3));
         result = await collection[action](data);
+    }
+    else if(action == 'updateOne') {
+        console.log('Running updateOne operation ...');
+        console.log(JSON.stringify(data, undefined, 3));
+        result = await collection[action](data.filter, data.update);
     }
     client.close();
     console.log('DB connection closed');
