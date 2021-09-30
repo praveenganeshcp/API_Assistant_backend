@@ -42,3 +42,7 @@ export async function cpBaseFunction(req: Request, response: Response) {
     console.log('DB connection closed');
     response.json({message: "Hello", result});
 }
+
+export async function cpBaseStorage(request: Request, response: Response) {
+    response.json({message: "Hello praveen", path: request.file?.path});
+}
