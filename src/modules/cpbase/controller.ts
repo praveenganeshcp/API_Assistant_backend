@@ -7,7 +7,7 @@ import { IProject } from "../../models/project";
 const daoService = new DaoService();
 
 export async function cpBaseFunction(req: Request, response: Response) {
-    let project_id = Number(req.headers['project-auth']);
+    let project_id = req.headers['project-auth'];
     let project = await daoService.find<IProject>(COLLECTIONS.PROJECTS, {_id: project_id});
     if(!project) {
         response.json({message: "Project not found"});
