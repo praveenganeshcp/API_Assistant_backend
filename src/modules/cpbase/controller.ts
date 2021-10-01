@@ -110,6 +110,7 @@ export async function fetchCollections(request: Request, response: Response) {
             const db = dbClient.db(dbName);
             let collectionNames = await (await db.listCollections().toArray()).map(collection => collection.name);
             dbClient.close();
+            console.log('connection closed');
             response.json({success: true, result: collectionNames});
         }
         else {
@@ -123,5 +124,5 @@ export async function fetchCollections(request: Request, response: Response) {
 }
 
 export async function cpBaseStorage(request: Request, response: Response) {
-    response.json({message: "Hello praveen", path: request.file?.path});
+    response.json({success: true, path: request.file?.path})
 }
