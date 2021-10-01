@@ -34,5 +34,25 @@ export async function createAccount(request: Request, response: Response) {
 }
 
 export async function loginUser(request: Request, response: Response) {
-    response.json({message: "hello"})   
+    try {
+        let validationErrors = validationResult(request);
+        if(validationErrors.isEmpty()) {
+            let { mailId, password } = request.body;
+            let user = await daoService.find<IUser>(COLLECTIONS.USERS, {mailId}) as IUser;
+            let isPasswordSame = await UtilityService.verifyPasswordHash(password, user?.hashed_password);
+            if(isPasswordSame) {
+                let token = UtilityService.createJWTSignature({user_id: user._id});
+                response.json({success: true, token, result: user});
+            }
+            else {
+                response.status(200).json({success: false, message: "Incorrect password"});
+            }
+        }
+        else {
+            response.status(400).json({success: false, message: validationErrors});
+        }
+    }
+    catch(err) {
+        response.status(500).json({success: false, message: "Internal server error"});
+    }
 }

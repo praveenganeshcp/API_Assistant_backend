@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { createAccount } from './controller';
-import { signupValidator } from './validators';
+import { createAccount, loginUser } from './controller';
+import { loginValidator, signupValidator } from './validators';
 
 export const accountsRoutes = Router();
 
 accountsRoutes.post('/signup', signupValidator, createAccount);
+accountsRoutes.post('/login', loginValidator, loginUser);

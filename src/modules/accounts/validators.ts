@@ -27,3 +27,23 @@ export const signupValidator = checkSchema({
         isStrongPassword: true,
     },
 })
+
+export const loginValidator = checkSchema({
+    mailId: {
+        in: ['body'],
+        isEmail: true,
+        custom: {
+            options: async (value: string) => {
+                let user = await daoService.find<IUser>(COLLECTIONS.USERS, {mailId: value});
+                if(!user) {
+                    return Promise.reject('Mail id not registered');
+                }
+                return Promise.resolve();
+            }
+        }
+    },
+    password: {
+        in: ['body'],
+        isStrongPassword: true,
+    }
+})
