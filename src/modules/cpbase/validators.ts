@@ -66,3 +66,20 @@ export const cpBaseGlobalValidator = checkSchema({
         }
     }
 })
+
+
+export const fetchCollectionsValidator = checkSchema({
+    project_auth: {
+        in: ['headers'],
+        custom: {
+            options: async (value: string) => {
+                console.log(typeof value);
+                let project = await daoService.find<IProject>(COLLECTIONS.PROJECTS, {_id: value});
+                if(!project) {
+                    return Promise.reject('Invalid project auth in header');
+                }
+                return Promise.resolve();
+            }
+        }
+    },
+})
