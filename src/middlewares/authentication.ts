@@ -9,9 +9,11 @@ const daoService = new DaoService();
 
 export async function authenticationMiddleware(req: Request, res: Response, next: NextFunction) {
     try {
-        let payload = UtilityService.verifyJWTSignature(req.headers['authorization'] as string);
+        let token = req.headers['authorization'] as string;
+        token = token.split(' ')[1];
+        let payload = UtilityService.verifyJWTSignature(token);
         console.log(payload);
-        req.user = await daoService.find<IUser>(COLLECTIONS.USERS, {_id: payload._id}) as IUser;
+        req.user = await daoService.find<IUser>(COLLECTIONS.USERS, {_id: payload.user_id}) as IUser;
         next();
     }
     catch(err) {
