@@ -29,6 +29,7 @@ export async function cpBaseFunction(req: Request, response: Response) {
         result = await collection[action](data).toArray();
     }
     else if(action == 'insertOne') {
+        data['_id'] = Date.now();
         console.log('Running insertOne operation ...');
         console.log(JSON.stringify(data, undefined, 3));
         result = await collection[action](data);
