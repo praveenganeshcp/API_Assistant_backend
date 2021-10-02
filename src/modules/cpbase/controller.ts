@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { MongoServerError, ObjectId } from "mongodb";
-import { COLLECTIONS } from "../../constants";
 import { DaoService } from "../../dao/dao";
 import { DbService } from "../../dao/db";
 import { ICpBaseRequest } from "../../models/base-request";
-import { IProject } from "../../models/project";
+import fs from 'fs/promises';
+import path from 'path';
+
 const daoService = new DaoService();
 
 export async function cpBaseFunction(req: Request, response: Response) {
@@ -124,5 +125,27 @@ export async function fetchCollections(request: Request, response: Response) {
 }
 
 export async function cpBaseStorage(request: Request, response: Response) {
-    response.json({success: true, path: request.file?.path})
+    response.status(201).json({success: true, path: request.file?.path})
+}
+
+export async function fetchDirectories(request: Request, response: Response) {
+    try {
+        let validationErrors = validationResult(request);
+        if(!validationErrors.isEmpty()) {
+            response.status(400).json({success: false, message: validationErrors});
+            return;
+        }
+        let requestedPath = request.query.path as string;
+        if(!requestedPath) {
+            requestedPath = '/';
+        }
+        let project_id = request.headers['project_auth'] as string;
+        let currentPath = path.join(process.cwd(), 'storage', project_id, ...requestedPath.split('/'));
+        let result = await (await fs.readdir(currentPath, {withFileTypes: true})).map(result => ({name: result.name, isFile: result.isFile()}));
+        response.json({success: true, result})
+    }
+    catch(err) {
+        console.error(err);
+        response.status(500).json({success: false, message: "Internal server error"});
+    }
 }
