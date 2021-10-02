@@ -96,21 +96,15 @@ export async function cpBaseFunction(req: Request, response: Response) {
 
 export async function fetchCollections(request: Request, response: Response) {
     try {
-        let validationErrors = validationResult(request);
-        if(validationErrors.isEmpty()) {
-            let project_auth = request.headers['project_auth'];
-            let dbName = 'project-'+project_auth;
-            const dbClient = await DbService.getClient();
-            console.log('New client created');
-            const db = dbClient.db(dbName);
-            let collectionNames = await (await db.listCollections().toArray()).map(collection => collection.name);
-            dbClient.close();
-            console.log('connection closed');
-            response.json({success: true, result: collectionNames});
-        }
-        else {
-            response.status(400).json({success: false, message: validationErrors});
-        }
+        let project_auth = request.headers['project_auth'];
+        let dbName = 'project-'+project_auth;
+        const dbClient = await DbService.getClient();
+        console.log('New client created');
+        const db = dbClient.db(dbName);
+        let collectionNames = await (await db.listCollections().toArray()).map(collection => collection.name);
+        dbClient.close();
+        console.log('connection closed');
+        response.json({success: true, result: collectionNames});
     }
     catch(err) {
         console.error(err);

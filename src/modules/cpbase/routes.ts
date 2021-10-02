@@ -7,6 +7,6 @@ import { cpBaseGlobalValidator, fetchCollectionsValidator, fetchDirectoriesValid
 export const cpBaseRoutes = Router();
 
 cpBaseRoutes.post('/global', cpBaseGlobalValidator, requestValidator, cpBaseFunction);
-cpBaseRoutes.get('/collections', fetchCollectionsValidator, fetchCollections);
+cpBaseRoutes.get('/collections', fetchCollectionsValidator, requestValidator, fetchCollections);
 cpBaseRoutes.post('/storage', multerStorage.single('file'), cpBaseStorage);
 cpBaseRoutes.get('/directories', fetchDirectoriesValidator, fetchDirectories);
