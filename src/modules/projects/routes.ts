@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { createProject } from './controller';
+import { createProjectValidator } from './validators';
 
 export const projectRoutes = Router();
 
-projectRoutes.post('/', createProject);
+projectRoutes.post('/', createProjectValidator, createProject);
