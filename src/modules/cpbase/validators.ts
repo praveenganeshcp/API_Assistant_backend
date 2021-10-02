@@ -2,12 +2,11 @@ import { checkSchema } from "express-validator";
 import { COLLECTIONS } from "../../constants";
 import { DaoService } from "../../dao/dao";
 import { IProject } from "../../models/project";
-import { Request } from 'express';
 import { ICpBaseRequest } from "../../models/base-request";
 
 const daoService = new DaoService();
 
-export const throwIfInvalidProjectAuth = async (value: string) => {
+const throwIfInvalidProjectAuth = async (value: string) => {
     let project = await daoService.find<IProject>(COLLECTIONS.PROJECTS, {_id: value});
     if(!project) {
         return Promise.reject('Invalid project auth in header');
@@ -68,17 +67,7 @@ export const cpBaseGlobalValidator = checkSchema({
     }
 })
 
-
-export const fetchCollectionsValidator = checkSchema({
-    project_auth: {
-        in: ['headers'],
-        custom: {
-            options: throwIfInvalidProjectAuth,
-        }
-    },
-})
-
-export const fetchDirectoriesValidator = checkSchema({
+export const projectAuthValidator = checkSchema({
     project_auth: {
         in: ['headers'],
         custom: {
