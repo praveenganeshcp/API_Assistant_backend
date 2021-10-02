@@ -118,11 +118,6 @@ export async function cpBaseStorage(request: Request, response: Response) {
 
 export async function fetchDirectories(request: Request, response: Response) {
     try {
-        let validationErrors = validationResult(request);
-        if(!validationErrors.isEmpty()) {
-            response.status(400).json({success: false, message: validationErrors});
-            return;
-        }
         let requestedPath = request.query.path as string;
         if(!requestedPath) {
             requestedPath = '/';
