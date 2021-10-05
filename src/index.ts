@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
 dotenv.config();
 import { appRoutes } from './routes';
@@ -10,6 +10,11 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))
+
+app.use((request: Request, response: Response, next: NextFunction) => {
+    next();
+    response.setHeader('Access-Control-Allow-Origin', '*');
+})
 
 app.use('/api/v1', appRoutes);
 
