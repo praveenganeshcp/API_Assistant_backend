@@ -8,7 +8,10 @@ const daoService = new DaoService();
 export const createProjectValidator = checkSchema({
     name: {
         in: ['body'],
-        isString: true,
+        isString: {
+            negated: false,
+            errorMessage: 'Project name must be a string'
+        },
         custom: {
             options: async (value: string) => {
                 let project = await daoService.find<IProject>(COLLECTIONS.PROJECTS, {name: value});

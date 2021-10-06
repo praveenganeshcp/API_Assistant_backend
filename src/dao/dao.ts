@@ -15,6 +15,11 @@ export class DaoService {
         await collection.insertOne(data as OptionalId<T>);
         return data as T;
     }
+    async findMany<T>(collectionName: string, filter: Filter<T>): Promise<T[] | null> {
+        const db = await DbService.getInstance();
+        const collection = db.collection<T>(collectionName);
+        return collection.find(filter, {}).toArray();
+    }
 
 }
 

@@ -10,6 +10,10 @@ const daoService = new DaoService();
 export async function authenticationMiddleware(req: Request, res: Response, next: NextFunction) {
     try {
         let token = req.headers['authorization'] as string;
+        if(!token) {
+            res.status(401).json({success: false, message: "Token not found in Authorization header"});    
+            return; 
+        }
         token = token.split(' ')[1];
         let payload = UtilityService.verifyJWTSignature(token);
         console.log(payload);
@@ -17,6 +21,7 @@ export async function authenticationMiddleware(req: Request, res: Response, next
         next();
     }
     catch(err) {
+        console.log(err);
         if(err instanceof JsonWebTokenError) {
             res.status(401).json({success: false, message: "Token expired"});    
             return;        
