@@ -8,7 +8,7 @@ export function requestValidator(request: Request, response: Response, next: Nex
             next();
         }
         else {
-            response.status(400).json({success: false, message: validationErrors});
+            response.status(400).json({success: false, message: validationErrors.array({onlyFirstError: true})[0].msg});
         }
     }
     catch(err) {
