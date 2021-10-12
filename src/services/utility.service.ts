@@ -1,6 +1,7 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { raw } from 'express';
+import fs from 'fs';
+import path from 'path';
 
 export class UtilityService {
 
@@ -22,5 +23,14 @@ export class UtilityService {
 
     static async verifyPasswordHash(rawPassword: string, hashedPassword: string): Promise<boolean> {
         return bcrypt.compare(rawPassword, hashedPassword);
+    }
+
+    static folderSetup() {
+        let cwd = process.cwd();
+        let storagePath = path.join(cwd, 'storage');
+        if(!fs.existsSync(storagePath)) {
+            console.log('creating storage folder');
+            fs.mkdirSync(storagePath);
+        }
     }
 }
