@@ -12,7 +12,6 @@ export async function createAccountCpBase(req: Request, response: Response) {
     try {
         let project_id = req.headers['project_auth'];
         let client = await DbService.getClient();
-        console.log('New client created');
         let db = client.db('project-'+project_id);
         let collection = db.collection('users');
         let user = req.body.user;
@@ -33,6 +32,40 @@ export async function createAccountCpBase(req: Request, response: Response) {
     catch(err) {
         console.error(err);
         response.status(500).json({success: false, message: "Internal server error"});
+    }
+}
+
+export async function cpbaseLogin(req: Request, res: Response) {
+    try {
+        let project_id = req.headers['project_auth'];
+        let client = await DbService.getClient();
+        let db = client.db('project-'+project_id);
+
+        let user = req.body.user;
+        let { mailId, password } = user;
+
+        let collection = db.collection('users');
+        let existingUser = await collection.findOne({mailId});
+        if(!existingUser) {
+            res.status(400).json({success: false, message: "MailId not registered"});
+            client.close();
+            console.log('connection closed');
+            return;
+        }
+        let isPasswordSame = await UtilityService.verifyPasswordHash(password, existingUser.hashed_password);
+        if(isPasswordSame == false) {
+            res.status(400).json({success: false, message: "Incorrect password"});
+            client.close();
+            console.log('connection closed');
+            return;
+        }
+        res.json({success: true, result: existingUser});
+        client.close();
+        console.log('connection closed');
+    }
+    catch(err) {
+        console.error(err);
+        res.status(500).json({success: false, message: "Internal server error"});
     }
 }
 
@@ -128,7 +161,6 @@ export async function fetchCollections(request: Request, response: Response) {
         let project_auth = request.headers['project_auth'];
         let dbName = 'project-'+project_auth;
         const dbClient = await DbService.getClient();
-        console.log('New client created');
         const db = dbClient.db(dbName);
         let collectionNames = await (await db.listCollections().toArray()).map(collection => collection.name);
         dbClient.close();
