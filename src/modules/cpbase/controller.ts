@@ -73,79 +73,10 @@ export async function cpbaseLogin(req: Request, res: Response) {
 export async function cpBaseFunction(req: Request, response: Response) {
     try {
     
-        let project_id = req.headers['project_auth'];
-
-        let client = await DbService.getClient();
-        let db = client.db('project-'+project_id);
-
+        let projectId = req.headers['project_auth'] as string;
         const { collectionName, action, data } = req.body as ICpBaseRequest;
-        let collection = db.collection(collectionName);
-
-        let result;
-
-        // find and fineOne  
-        if(action == 'findOne') {
-            console.log('Running findOne operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data);
-        }
-        else if(action == 'find') {
-            console.log('Running findMany operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data).toArray();
-        }
-
-        // insertOne and many
-        else if(action == 'insertOne') {
-            data['_id'] = new ObjectId().toHexString();
-            console.log('Running insertOne operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data);
-        }
-        else if(action == 'insertMany') {
-            data.forEach((record: any) => {
-                record['_id'] = new ObjectId().toHexString();
-            })
-            console.log('Running insertMany operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data);
-        }
-
-        // update one and many
-        else if(action == 'updateOne') {
-            console.log('Running updateOne operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data.filter, data.update);
-        }
-        else if(action == 'updateMany') {
-            console.log('Running updateMany operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data.filter, data.update);
-        }
-
-        // aggregate
-        else if(action == 'aggregate') {
-            console.log('Running aggregate operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data).toArray();
-        }
-
-        // delete one and many options
-        else if(action == 'deleteOne') {
-            console.log('Running deleteOne operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data);
-        }
-        else if(action == 'deleteMany') {
-            console.log('Running deleteMany operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data);
-        }
-
-        client.close();
-        console.log('DB connection closed');
-        response.json({success: true, result});
-        
+        let result = await cpBaseService.executeQueries(projectId, collectionName, action, data);
+        response.json({success: true, result});   
     }
     catch(err) {
         console.error(err);
