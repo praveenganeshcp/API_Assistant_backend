@@ -159,8 +159,8 @@ export async function cpBaseFunction(req: Request, response: Response) {
 
 export async function fetchCollections(request: Request, response: Response) {
     try {
-        let project_auth = request.headers['project_auth'] as string;
-        const collectionNames = await cpBaseService.fetchProjectCollectionNames(project_auth);
+        let projectId = request.headers['project_auth'] as string;
+        const collectionNames = await cpBaseService.fetchProjectCollectionNames(projectId);
         response.json({success: true, result: collectionNames});
     }
     catch(err) {
@@ -173,18 +173,18 @@ export async function cpBaseStorage(request: Request, response: Response) {
     response.status(201).json({success: true, path: request.file?.path})
 }
 
-export async function fetchDirectories(request: Request, response: Response) {
+export async function fetchFileSystem(request: Request, response: Response) {
     try {
         let requestedPath = request.query.path as string;
-        if(!requestedPath) {
-            requestedPath = '/';
-        }
-        let project_id = request.headers['project_auth'] as string;
-        let currentPath = path.join(process.cwd(), 'storage', project_id, ...requestedPath.split('/'));
-        let result = await (await fs.readdir(currentPath, {withFileTypes: true})).map(result => ({name: result.name, isFile: result.isFile()}));
+        let projectId = request.headers['project_auth'] as string;
+        let result = await cpBaseService.fetchFileSystem(projectId, requestedPath);
         response.json({success: true, result})
     }
-    catch(err) {
+    catch(err: any) {
+        if(err.code == 'ENOENT') {
+            response.status(400).json({success: false, message: "Requested path does not exists in the filesystem"});
+            return;
+        }
         console.error(err);
         response.status(500).json({success: false, message: "Internal server error"});
     }

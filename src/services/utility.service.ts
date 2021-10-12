@@ -10,7 +10,7 @@ export class UtilityService {
     }
 
     static createJWTSignature(payload: any) {
-        return jwt.sign(payload, this.getEnvProp('JWT_SECRET'));
+        return jwt.sign(payload, this.getEnvProp('JWT_SECRET'), {expiresIn: '1h'});
     }
 
     static verifyJWTSignature(token: string): JwtPayload {
