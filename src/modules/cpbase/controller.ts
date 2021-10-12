@@ -70,9 +70,8 @@ export async function cpbaseLogin(req: Request, res: Response) {
     }
 }
 
-export async function cpBaseFunction(req: Request, response: Response) {
+export async function cpBaseGlobal(req: Request, response: Response) {
     try {
-    
         let projectId = req.headers['project_auth'] as string;
         const { collectionName, action, data } = req.body as ICpBaseRequest;
         let result = await cpBaseService.executeQueries(projectId, collectionName, action, data);
