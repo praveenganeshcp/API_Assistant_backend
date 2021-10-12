@@ -1,8 +1,8 @@
 import { DbService } from "../../dao/db";
-import fs from 'fs';
 import fsPromise from 'fs/promises';
 import path from 'path';
 import { ObjectId } from "mongodb";
+import { UtilityService } from "../../services/utility.service";
 
 async function createDBConnection(projectId: string) {
     try {
@@ -134,8 +134,35 @@ export async function executeQueries(projectId: string, collectionName: string, 
     }
 }
 
+export async function createAccount(projectId: string, userData: any) {
+    try {
+        let { db, closeConnection } = await createDBConnection(projectId);
+        try {
+            let collection = db.collection('users');
+            let existingMailId = await collection.findOne({mailId: userData.mailId});
+            if(existingMailId) {
+                throw {existingMailId: "MailId already registered"};
+            }
+            userData.hashed_password = await UtilityService.createPasswordHash(userData.password);
+            delete userData.password;
+            await collection.insertOne(userData);
+            closeConnection();
+            return userData;
+        }
+        catch(err) {
+            closeConnection();
+            throw err;
+        }
+    }
+    catch(err) {
+        console.error(err);
+        throw err;
+    }
+}
+
 export const cpBaseService = {
     fetchProjectCollectionNames,
     fetchFileSystem,
-    executeQueries
+    executeQueries,
+    createAccount
 }
