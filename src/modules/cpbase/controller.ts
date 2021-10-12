@@ -7,6 +7,7 @@ import { ICpBaseRequest } from "../../models/base-request";
 import fs from 'fs/promises';
 import path from 'path';
 import { UtilityService } from "../../services/utility.service";
+import { cpBaseService } from "./services";
 
 export async function createAccountCpBase(req: Request, response: Response) {
     try {
@@ -158,13 +159,8 @@ export async function cpBaseFunction(req: Request, response: Response) {
 
 export async function fetchCollections(request: Request, response: Response) {
     try {
-        let project_auth = request.headers['project_auth'];
-        let dbName = 'project-'+project_auth;
-        const dbClient = await DbService.getClient();
-        const db = dbClient.db(dbName);
-        let collectionNames = await (await db.listCollections().toArray()).map(collection => collection.name);
-        dbClient.close();
-        console.log('connection closed');
+        let project_auth = request.headers['project_auth'] as string;
+        const collectionNames = await cpBaseService.fetchProjectCollectionNames(project_auth);
         response.json({success: true, result: collectionNames});
     }
     catch(err) {
