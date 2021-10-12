@@ -6,6 +6,35 @@ import { DbService } from "../../dao/db";
 import { ICpBaseRequest } from "../../models/base-request";
 import fs from 'fs/promises';
 import path from 'path';
+import { UtilityService } from "../../services/utility.service";
+
+export async function createAccountCpBase(req: Request, response: Response) {
+    try {
+        let project_id = req.headers['project_auth'];
+        let client = await DbService.getClient();
+        console.log('New client created');
+        let db = client.db('project-'+project_id);
+        let collection = db.collection('users');
+        let user = req.body.user;
+        let existingMailId = await collection.findOne({mailId: user.mailId});
+        if(existingMailId) {
+            response.status(400).json({success: false, messsage: "MailId already registered"});
+            console.log('connection closed');
+            client.close();
+            return;
+        }
+        user.hashed_password = await UtilityService.createPasswordHash(user.password);
+        delete user.password;
+        await collection.insertOne(user);
+        client.close();
+        console.log('connection closed');
+        response.status(201).json({success: true, result: user});
+    }
+    catch(err) {
+        console.error(err);
+        response.status(500).json({success: false, message: "Internal server error"});
+    }
+}
 
 export async function cpBaseFunction(req: Request, response: Response) {
     try {

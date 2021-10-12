@@ -67,6 +67,38 @@ export const cpBaseGlobalValidator = checkSchema({
     }
 })
 
+export const cpbaseSignupValidator = checkSchema({
+    project_auth: {
+        in: ['headers'],
+        custom: {
+            options: throwIfInvalidProjectAuth
+        }
+    },
+    user: {
+        in: ['body'],
+        isObject: {
+            negated: false,
+            errorMessage: "user field must be object"
+        },
+        errorMessage: "user object not found in request body",
+    },
+    'user.mailId': {
+        in: ['body'],
+        isEmail: {
+            negated: false,
+            errorMessage: "Invalid mailId value in user object",
+        },
+        errorMessage: "mailId value not present in user object"
+    },
+    'user.password': {
+        in: ['body'],
+        isStrongPassword: {
+            negated: false,
+            errorMessage: "Password must contain atleast one captial, small letter, digit and a special character"
+        }
+    }
+})
+
 export const projectAuthValidator = checkSchema({
     project_auth: {
         in: ['headers'],
