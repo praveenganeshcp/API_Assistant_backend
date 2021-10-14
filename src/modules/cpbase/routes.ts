@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { multerStorage } from '../../middlewares/multer';
 import { requestValidator } from '../../middlewares/request-validaor';
-import { cpBaseGlobal, cpbaseLogin, cpBaseStorage, createAccountCpBase, fetchCollections, fetchFileSystem, fetchObjectStats } from './controller';
+import { cpBaseGlobal, cpbaseLogin, cpBaseStorage, createAccountCpBase, createDirectory, fetchCollections, fetchFileSystem, fetchObjectStats } from './controller';
 import { cpBaseGlobalValidator, cpbaseSignupValidator, projectAuthValidator } from './validators';
 
 export const cpBaseRoutes = Router();
@@ -13,3 +13,4 @@ cpBaseRoutes.get('/collections', projectAuthValidator, requestValidator, fetchCo
 cpBaseRoutes.post('/storage', projectAuthValidator, requestValidator, multerStorage.single('file'), cpBaseStorage);
 cpBaseRoutes.get('/filesystem', projectAuthValidator, requestValidator, fetchFileSystem);
 cpBaseRoutes.get('/object', fetchObjectStats);
+cpBaseRoutes.post('/object', projectAuthValidator, requestValidator, createDirectory);

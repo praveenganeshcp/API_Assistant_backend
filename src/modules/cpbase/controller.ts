@@ -115,3 +115,16 @@ export async function fetchObjectStats(req: Request, res: Response) {
         res.status(500).json({success: false, message: "Internal server error"});
     }
 }
+
+export async function createDirectory(req: Request, res: Response) {
+    try {
+        let projectId: string = req.headers['project_auth'] as string;
+        let { rootPath, dirName } = req.body;
+        await cpBaseService.createDirectory(projectId, rootPath, dirName);
+        res.json({success: true, result: "Created successfully"});
+    }
+    catch(err) {
+        console.error(err);
+        res.status(500).json({success: false, message: "Internal server error"});
+    }
+}

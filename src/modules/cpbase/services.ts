@@ -164,10 +164,16 @@ async function fetchObjectStat(objectPath: string) {
     return fsPromise.stat(objectPath);
 }
 
+async function createDirectory(projectId: string, rootPath: string, dirName: string) {
+    let fullPath = path.join(process.cwd(), 'storage', projectId, rootPath, dirName);
+    fsPromise.mkdir(fullPath);
+}
+
 export const cpBaseService = {
     fetchProjectCollectionNames,
     fetchFileSystem,
     executeQueries,
     createAccount,
-    fetchObjectStat
+    fetchObjectStat,
+    createDirectory
 }
