@@ -54,7 +54,7 @@ async function fetchFileSystem(projectId: string, requestedPath: string) {
     }
 }
 
-export async function executeQueries(projectId: string, collectionName: string, action: string, data: any) {
+async function executeQueries(projectId: string, collectionName: string, action: string, data: any) {
     try {
         let { db, closeConnection } = await createDBConnection(projectId);
         try {
@@ -134,7 +134,7 @@ export async function executeQueries(projectId: string, collectionName: string, 
     }
 }
 
-export async function createAccount(projectId: string, userData: any) {
+async function createAccount(projectId: string, userData: any) {
     try {
         let { db, closeConnection } = await createDBConnection(projectId);
         try {
@@ -160,9 +160,14 @@ export async function createAccount(projectId: string, userData: any) {
     }
 }
 
+async function fetchObjectStat(objectPath: string) {
+    return fsPromise.stat(objectPath);
+}
+
 export const cpBaseService = {
     fetchProjectCollectionNames,
     fetchFileSystem,
     executeQueries,
-    createAccount
+    createAccount,
+    fetchObjectStat
 }

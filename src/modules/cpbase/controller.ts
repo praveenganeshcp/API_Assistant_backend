@@ -1,11 +1,7 @@
 import { Request, Response } from "express";
-import { validationResult } from "express-validator";
 import { MongoServerError, ObjectId } from "mongodb";
-import { DaoService } from "../../dao/dao";
 import { DbService } from "../../dao/db";
 import { ICpBaseRequest } from "../../models/base-request";
-import fs from 'fs/promises';
-import path from 'path';
 import { UtilityService } from "../../services/utility.service";
 import { cpBaseService } from "./services";
 
@@ -107,5 +103,15 @@ export async function fetchFileSystem(request: Request, response: Response) {
         }
         console.error(err);
         response.status(500).json({success: false, message: "Internal server error"});
+    }
+}
+
+export async function fetchObjectStats(req: Request, res: Response) {
+    try {
+        res.json({success: true, result: await cpBaseService.fetchObjectStat(req.query.path as string)});
+    }
+    catch(err) {
+        console.error(err);
+        res.status(500).json({success: false, message: "Internal server error"});
     }
 }
