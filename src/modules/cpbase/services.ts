@@ -166,7 +166,13 @@ async function fetchObjectStat(objectPath: string) {
 
 async function createDirectory(projectId: string, rootPath: string, dirName: string) {
     let fullPath = path.join(process.cwd(), 'storage', projectId, rootPath, dirName);
-    fsPromise.mkdir(fullPath);
+    await fsPromise.mkdir(fullPath);
+}
+
+async function removeObject(projectId: string, objectPath: string) {
+    let fullPath = path.join(process.cwd(), 'storage', projectId, objectPath);
+    console.log(fullPath);
+    await fsPromise.rm(fullPath, {recursive: true});
 }
 
 export const cpBaseService = {
@@ -175,5 +181,6 @@ export const cpBaseService = {
     executeQueries,
     createAccount,
     fetchObjectStat,
-    createDirectory
+    createDirectory,
+    removeObject
 }

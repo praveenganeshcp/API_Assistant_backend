@@ -128,3 +128,16 @@ export async function createDirectory(req: Request, res: Response) {
         res.status(500).json({success: false, message: "Internal server error"});
     }
 }
+
+export async function removeObject(req: Request, res: Response) {
+    try {
+        let projectId: string = req.headers['project_auth'] as string;
+        let path = req.query.path as string;
+        await cpBaseService.removeObject(projectId, path);
+        res.json({success: true, result: "Removed successfully"});
+    }
+    catch(err) {
+        console.error(err);
+        res.status(500).json({success: false, message: "Internal server error"});
+    }
+}
