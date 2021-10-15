@@ -108,7 +108,14 @@ export async function fetchFileSystem(request: Request, response: Response) {
 
 export async function fetchObjectStats(req: Request, res: Response) {
     try {
-        res.json({success: true, result: await cpBaseService.fetchObjectStat(req.query.path as string)});
+        let projectId: string = req.headers['project_auth'] as string;
+        let objectPath = req.query.path as string;
+        let result = await cpBaseService.fetchObjectStat(projectId, objectPath);
+        if(result == false) {
+            res.status(400).json({success: false, result: "Object path does not exists"});
+            return;
+        }
+        res.json({success: true, result});
     }
     catch(err) {
         console.error(err);

@@ -1,5 +1,6 @@
 import { DbService } from "../../dao/db";
 import fsPromise from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
 import { ObjectId } from "mongodb";
 import { UtilityService } from "../../services/utility.service";
@@ -160,8 +161,12 @@ async function createAccount(projectId: string, userData: any) {
     }
 }
 
-async function fetchObjectStat(objectPath: string) {
-    return fsPromise.stat(objectPath);
+async function fetchObjectStat(projectId: string, objectPath: string) {
+    let rootPath = path.join(process.cwd(), 'storage', projectId, objectPath);
+    if(fs.existsSync(rootPath)) {
+        return fsPromise.stat(rootPath);
+    }
+    return false;
 }
 
 async function createDirectory(projectId: string, rootPath: string, dirName: string) {

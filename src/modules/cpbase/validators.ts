@@ -107,3 +107,34 @@ export const projectAuthValidator = checkSchema({
         }
     },
 })
+
+export const createDirectoryValidator = checkSchema({
+    project_auth: {
+        in: ['headers'],
+        custom: {
+            options: throwIfInvalidProjectAuth
+        }
+    },
+    rootDir: {
+        in: ['body'],
+        isString: true,
+    },
+    dirName: {
+        in: ['body'],
+        isString: true,
+    }
+})
+
+export const fileStatValidator = checkSchema({
+    project_auth: {
+        in: ['headers'],
+        custom: {
+            options: throwIfInvalidProjectAuth
+        }
+    },
+    path: {
+        in: ['query'],
+        isString: true,
+        errorMessage: "Invalid value for path field in query param"
+    }
+})
