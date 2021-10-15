@@ -116,7 +116,7 @@ export async function fetchObjectStats(req: Request, res: Response) {
     catch(err: any) {
         console.error(err);
         if(err.errMsg) {
-            res.status(400).json({success: false, result: "Object path does not exists"});
+            res.status(400).json({success: false, message: "Object path does not exists"});
             return;
         }
         res.status(500).json({success: false, message: "Internal server error"});
@@ -132,7 +132,7 @@ export async function createDirectory(req: Request, res: Response) {
     }
     catch(err: any) {
         if(err.errMsg) {
-            res.status(400).json({success: false, result: err.errMsg});
+            res.status(400).json({success: false, message: err.errMsg});
             return;
         }
         console.error(err);
@@ -150,7 +150,7 @@ export async function removeObject(req: Request, res: Response) {
     catch(err: any) {
         console.error(err);
         if(err.errMsg) {
-            res.status(400).json({success: false, result: err.errMsg});
+            res.status(400).json({success: false, message: err.errMsg});
             return;
         }
         res.status(500).json({success: false, message: "Internal server error"});
