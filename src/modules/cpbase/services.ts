@@ -189,8 +189,12 @@ async function createDirectory(projectId: string, rootPath: string, dirName: str
 
 async function removeObject(projectId: string, objectPath: string) {
     let fullPath = path.join(process.cwd(), 'storage', projectId, objectPath);
-    console.log(fullPath);
-    await fsPromise.rm(fullPath, {recursive: true});
+    if(fs.existsSync(fullPath)) {
+        await fsPromise.rm(fullPath, {recursive: true});
+    }
+    else {
+        throw {errMsg: "Object path does not exists"};
+    }
 }
 
 export const cpBaseService = {

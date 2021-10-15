@@ -140,3 +140,24 @@ export const fileStatValidator = checkSchema({
         errorMessage: "Invalid value for path field in query param"
     }
 })
+
+export const removeObjectValidator = checkSchema({
+    project_auth: {
+        in: ['headers'],
+        custom: {
+            options: throwIfInvalidProjectAuth
+        }
+    },
+    path: {
+        in: ['query'],
+        isString: true,
+        custom: {
+            options: (value) => {
+                if(value === '/' || value == '') {
+                    throw "Cannot delete root directory object"
+                }
+                return true;
+            }
+        }
+    }
+})

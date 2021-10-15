@@ -145,10 +145,14 @@ export async function removeObject(req: Request, res: Response) {
         let projectId: string = req.headers['project_auth'] as string;
         let path = req.query.path as string;
         await cpBaseService.removeObject(projectId, path);
-        res.json({success: true, result: "Removed successfully"});
+        res.json({success: true, result: "Object deleted"});
     }
-    catch(err) {
+    catch(err: any) {
         console.error(err);
+        if(err.errMsg) {
+            res.status(400).json({success: false, result: err.errMsg});
+            return;
+        }
         res.status(500).json({success: false, message: "Internal server error"});
     }
 }
