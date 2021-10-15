@@ -166,7 +166,9 @@ async function fetchObjectStat(projectId: string, objectPath: string) {
     if(fs.existsSync(rootPath)) {
         return fsPromise.stat(rootPath);
     }
-    return false;
+    else {
+        throw {errMsg: "Object path does not exists"};
+    }
 }
 
 async function createDirectory(projectId: string, rootPath: string, dirName: string) {

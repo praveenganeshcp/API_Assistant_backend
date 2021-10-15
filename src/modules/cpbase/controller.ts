@@ -111,14 +111,14 @@ export async function fetchObjectStats(req: Request, res: Response) {
         let projectId: string = req.headers['project_auth'] as string;
         let objectPath = req.query.path as string;
         let result = await cpBaseService.fetchObjectStat(projectId, objectPath);
-        if(result == false) {
+        res.json({success: true, result});
+    }
+    catch(err: any) {
+        console.error(err);
+        if(err.errMsg) {
             res.status(400).json({success: false, result: "Object path does not exists"});
             return;
         }
-        res.json({success: true, result});
-    }
-    catch(err) {
-        console.error(err);
         res.status(500).json({success: false, message: "Internal server error"});
     }
 }
