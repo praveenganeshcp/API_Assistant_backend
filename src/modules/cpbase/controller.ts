@@ -128,9 +128,13 @@ export async function createDirectory(req: Request, res: Response) {
         let projectId: string = req.headers['project_auth'] as string;
         let { rootPath, dirName } = req.body;
         await cpBaseService.createDirectory(projectId, rootPath, dirName);
-        res.json({success: true, result: "Created successfully"});
+        res.json({success: true, result: "Directory created successfully"});
     }
-    catch(err) {
+    catch(err: any) {
+        if(err.errMsg) {
+            res.status(400).json({success: false, result: err.errMsg});
+            return;
+        }
         console.error(err);
         res.status(500).json({success: false, message: "Internal server error"});
     }

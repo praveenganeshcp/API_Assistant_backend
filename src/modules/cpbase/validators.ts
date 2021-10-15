@@ -115,13 +115,15 @@ export const createDirectoryValidator = checkSchema({
             options: throwIfInvalidProjectAuth
         }
     },
-    rootDir: {
+    rootPath: {
         in: ['body'],
         isString: true,
+        errorMessage: "Invalid value for rootPath value",
     },
     dirName: {
         in: ['body'],
         isString: true,
+        errorMessage: "Invalid value for dirName value",
     }
 })
 

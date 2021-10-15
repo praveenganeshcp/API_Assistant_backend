@@ -170,8 +170,19 @@ async function fetchObjectStat(projectId: string, objectPath: string) {
 }
 
 async function createDirectory(projectId: string, rootPath: string, dirName: string) {
-    let fullPath = path.join(process.cwd(), 'storage', projectId, rootPath, dirName);
-    await fsPromise.mkdir(fullPath);
+    let fullPath = path.join(process.cwd(), 'storage', projectId, rootPath);
+    if(fs.existsSync(fullPath)) {
+        let dirPath = path.join(fullPath, dirName);
+        if(!fs.existsSync(dirPath)) {
+            await fsPromise.mkdir(dirPath);
+        }
+        else {
+            throw {errMsg: "Specified directory name is already exist"};
+        }
+    }
+    else {
+        throw {errMsg: "Specified root directory does not exists"};
+    }
 }
 
 async function removeObject(projectId: string, objectPath: string) {

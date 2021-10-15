@@ -37,6 +37,5 @@ export async function fetchProjects(request: Request, response: Response) {
     catch(err) {
         console.error(err);
         response.status(500).json({success: false, message: "Internal server error"});
-    }
-    
+    }   
 }
