@@ -1,4 +1,4 @@
-import { Filter, FindOptions, OptionalId } from "mongodb";
+import { Filter, FindOptions, OptionalId, UpdateFilter, UpdateOptions } from "mongodb";
 import { DbService } from "./db";
 
 export class DaoService {
@@ -21,5 +21,16 @@ export class DaoService {
         return collection.find(filter, findOptions).toArray();
     }
 
+    async updateOne<T>(collectionName: string, filter: Filter<T>, update: UpdateFilter<T>, options: UpdateOptions = {}) {
+        const db = await DbService.getInstance();
+        const collection = db.collection<T>(collectionName);
+        return collection.updateOne(filter, update, options);
+    }
+
+    async updateMany<T>(collectionName: string, filter: Filter<T>, update: UpdateFilter<T>, options: UpdateOptions = {}) {
+        const db = await DbService.getInstance();
+        const collection = db.collection<T>(collectionName);
+        return collection.updateMany(filter, update, options);
+    }
 }
 

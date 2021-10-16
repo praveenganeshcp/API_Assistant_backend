@@ -1,4 +1,5 @@
 export enum COLLECTIONS {
     USERS="users",
-    PROJECTS="projects"
+    PROJECTS="projects",
+    APIKEYs="api_keys"
 }

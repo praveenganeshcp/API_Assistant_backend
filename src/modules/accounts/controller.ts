@@ -30,3 +30,14 @@ export async function loginUser(request: Request, response: Response) {
         response.status(500).json({success: false, message: "Internal server error"});
     }
 }
+
+export async function generateAPIKey(request: Request, response: Response) {
+    try {   
+        let apiKey = await accountService.generateAPIKey(request.user._id);
+        response.json({success: true, result: apiKey});
+    }
+    catch(err) {
+        console.error(err);
+        response.status(500).json({success: false, message: "Internal server error"});
+    }
+}
