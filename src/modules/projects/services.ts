@@ -21,6 +21,7 @@ async function createProject(userId: string, projectName: string) {
         await daoService.insert(COLLECTIONS.PROJECTS, newProject);
         let projectStoragePath = path.join(process.cwd(), 'storage', newProject._id);
         fs.mkdirSync(projectStoragePath);
+        await generateProjectAPIKey(newProject._id);
         return newProject;
     }
     catch(err) {
