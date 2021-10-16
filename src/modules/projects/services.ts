@@ -4,8 +4,8 @@ import { DaoService } from "../../dao/dao";
 import { IProject } from "../../models/project";
 import path from 'path';
 import fs from 'fs';
-import { UtilityService } from "../../services/utility.service";
 import { IProjectKey } from "../../models/project-key";
+import { randomBytes } from 'crypto';
 
 const daoService = new DaoService();
 
@@ -47,10 +47,21 @@ async function fetchProjectsByUserId(userId: string) {
     }
 }
 
+async function generateProjectToken(): Promise<string> {
+    return new Promise((resolve, reject) => {
+        randomBytes(48, function(err, buffer) {
+            if(err) {
+                reject(err);
+                return;
+            }
+            resolve(buffer.toString('hex'));
+        });
+    })
+}
+
 async function generateProjectAPIKey(projectId: string) {
     try {
-        const authToken = projectId + Date.now().toString();
-        let hashedKey = await UtilityService.createPasswordHash(authToken);
+        let hashedKey = await generateProjectToken();
         let tokenObj: Partial<IProjectKey> = {
             project_id: projectId,
             token: hashedKey,
