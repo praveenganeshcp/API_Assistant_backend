@@ -36,7 +36,7 @@ async function generateAPIKey(userId: string) {
             token: doubleHashedKey,
             created_on: new Date(),
         }
-        await daoService.updateOne<IUserToken>(COLLECTIONS.APIKEYs, {user_id: userId}, {
+        await daoService.updateOne<IUserToken>(COLLECTIONS.APIKEYS, {user_id: userId}, {
             $set: tokenObj
         }, {upsert: true});
         return hashedKey;

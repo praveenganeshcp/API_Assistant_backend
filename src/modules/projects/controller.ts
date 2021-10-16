@@ -28,3 +28,14 @@ export async function fetchProjects(request: Request, response: Response) {
         response.status(500).json({success: false, message: "Internal server error"});
     }   
 }
+
+export async function generateProjectAPIKey(request: Request, response: Response) {
+    try {
+        let projectKey = await projectService.generateProjectAPIKey(request.body.projectId);
+        response.json({success: true, result: projectKey})
+    }
+    catch(err) {
+        console.error(err);
+        response.status(500).json({success: false, message: "Internal server error"});
+    }
+}
