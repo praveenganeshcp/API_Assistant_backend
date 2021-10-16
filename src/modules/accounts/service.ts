@@ -66,8 +66,28 @@ async function verifyLogin(mailId: string, password: string) {
     }
 }
 
+async function changePassword(mailId: string, oldPassword: string, newPassword: string) {
+    try {
+        let userObj = await daoService.find<IUser>(COLLECTIONS.USERS, {mailId}) as IUser;
+        let isPasswordSame = await UtilityService.verifyPasswordHash(oldPassword, userObj.hashed_password);
+        if(isPasswordSame == false) {
+            throw {errMsg: "Incorrect Old password"};
+        }
+        let newHashedPassword = await UtilityService.createPasswordHash(newPassword);
+        await daoService.updateOne<IUser>(COLLECTIONS.USERS, {mailId}, {
+            $set: { hashed_password: newHashedPassword, updated_on: new Date()}
+        });
+        return "Password changed successfully";
+    }
+    catch(err) {
+        console.error(err);
+        throw err;
+    }
+}
+
 export const accountService = {
     createUserAccount,
     verifyLogin,
-    generateAPIKey
+    generateAPIKey,
+    changePassword
 }

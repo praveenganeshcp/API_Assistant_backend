@@ -56,3 +56,16 @@ export const loginValidator = checkSchema({
         isStrongPassword: true,
     }
 })
+
+export const changePasswordValidator = checkSchema({
+    oldPassword: {
+        in: ['body'],
+        isString: true,
+        errorMessage: "Invalid value for oldPassword field",
+    },
+    newPassword: {
+        in: ['body'],
+        isString: true,
+        errorMessage: "Invalid value for newPassword field",
+    }
+})

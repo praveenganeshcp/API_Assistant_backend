@@ -41,3 +41,19 @@ export async function generateAPIKey(request: Request, response: Response) {
         response.status(500).json({success: false, message: "Internal server error"});
     }
 }
+
+export async function changePassword(request: Request, response: Response) {
+    try {
+        let { oldPassword, newPassword } = request.body;
+        let result = await accountService.changePassword(request.user.mailId, oldPassword, newPassword);
+        response.json({success: true, result});
+    }
+    catch(err: any) {
+        console.error(err);
+        if(err.errMsg) {
+            response.json({success: false, result: err.errMsg});
+            return;
+        }
+        response.status(500).json({success: false, message: "Internal server error"});
+    }
+}
