@@ -1,21 +1,29 @@
 import { checkSchema } from "express-validator";
 import { COLLECTIONS } from "../../constants";
 import { DaoService } from "../../dao/dao";
-import { IProject } from "../../models/project";
 import { ICpBaseRequest } from "../../models/base-request";
+import { IncomingMessage } from 'http';
+import { IProjectKey } from "../../models/project-key";
 
 const daoService = new DaoService();
 
-const throwIfInvalidProjectAuth = async (value: string) => {
-    let project = await daoService.find<IProject>(COLLECTIONS.PROJECTS, {_id: value});
-    if(!project) {
-        return Promise.reject('Invalid project auth in header');
-    }
-    return Promise.resolve();
+const throwIfInvalidProjectAuth = async (value: string, other: any) => {
+    try {
+        let request = other.req as IncomingMessage;
+        let projectKeyObj = await daoService.find<IProjectKey>(COLLECTIONS.PROJECTKEYS, {token: value});
+        if(projectKeyObj) {
+            request.headers['project_auth'] = projectKeyObj.project_id;
+            return Promise.resolve();
+        }
+        return Promise.reject('Invalid app_secret');
+    }   
+    catch(err) {
+        return Promise.reject(err);
+    } 
 }
 
 export const cpBaseGlobalValidator = checkSchema({
-    project_auth: {
+    app_secret: {
         in: ['headers'],
         custom: {
             options: throwIfInvalidProjectAuth
@@ -68,7 +76,7 @@ export const cpBaseGlobalValidator = checkSchema({
 })
 
 export const cpbaseSignupValidator = checkSchema({
-    project_auth: {
+    app_secret: {
         in: ['headers'],
         custom: {
             options: throwIfInvalidProjectAuth
@@ -100,7 +108,7 @@ export const cpbaseSignupValidator = checkSchema({
 })
 
 export const projectAuthValidator = checkSchema({
-    project_auth: {
+    app_secret: {
         in: ['headers'],
         custom: {
             options: throwIfInvalidProjectAuth
@@ -109,7 +117,7 @@ export const projectAuthValidator = checkSchema({
 })
 
 export const createDirectoryValidator = checkSchema({
-    project_auth: {
+    app_secret: {
         in: ['headers'],
         custom: {
             options: throwIfInvalidProjectAuth
@@ -128,7 +136,7 @@ export const createDirectoryValidator = checkSchema({
 })
 
 export const fileStatValidator = checkSchema({
-    project_auth: {
+    app_secret: {
         in: ['headers'],
         custom: {
             options: throwIfInvalidProjectAuth
@@ -142,7 +150,7 @@ export const fileStatValidator = checkSchema({
 })
 
 export const removeObjectValidator = checkSchema({
-    project_auth: {
+    app_secret: {
         in: ['headers'],
         custom: {
             options: throwIfInvalidProjectAuth

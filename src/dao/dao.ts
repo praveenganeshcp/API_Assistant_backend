@@ -1,4 +1,4 @@
-import { Filter, FindOptions, OptionalId, UpdateFilter, UpdateOptions } from "mongodb";
+import { AggregateOptions, Filter, FindOptions, OptionalId, UpdateFilter, UpdateOptions } from "mongodb";
 import { DbService } from "./db";
 
 export class DaoService {
@@ -31,6 +31,12 @@ export class DaoService {
         const db = await DbService.getInstance();
         const collection = db.collection<T>(collectionName);
         return collection.updateMany(filter, update, options);
+    }
+
+    async aggregate<T>(collectionName: string, pipeline: any[], options: AggregateOptions = {}) {
+        const db = await DbService.getInstance();
+        const collection = db.collection<T>(collectionName);
+        return collection.aggregate(pipeline, options).toArray();
     }
 }
 

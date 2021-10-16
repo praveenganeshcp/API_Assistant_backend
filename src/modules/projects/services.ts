@@ -44,10 +44,9 @@ async function generateProjectAPIKey(projectId: string) {
     try {
         const authToken = projectId + Date.now().toString();
         let hashedKey = await UtilityService.createPasswordHash(authToken);
-        let doubleHashedKey = await UtilityService.createPasswordHash(hashedKey);
         let tokenObj: Partial<IProjectKey> = {
             project_id: projectId,
-            token: doubleHashedKey,
+            token: hashedKey,
             created_on: new Date(),
         }
         await daoService.updateOne<IProjectKey>(COLLECTIONS.PROJECTKEYS, {project_id: projectId}, {
