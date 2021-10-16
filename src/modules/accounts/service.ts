@@ -15,7 +15,8 @@ async function createUserAccount(username: string, mailId: string, password: str
             mailId: mailId,
             hashed_password: await UtilityService.createPasswordHash(password),
             created_on: new Date(),
-            updated_on: null
+            updated_on: null,
+            last_login: null,
         }
         let result = await daoService.insert<IUser>(COLLECTIONS.USERS, newUser);
         return result;
@@ -51,7 +52,7 @@ async function verifyLogin(mailId: string, password: string) {
         let user = await daoService.find<IUser>(COLLECTIONS.USERS, {mailId}) as IUser;
         let isPasswordSame = await UtilityService.verifyPasswordHash(password, user?.hashed_password);
         if(isPasswordSame) {
-            const token = UtilityService.createJWTSignature({user_id: user._id});
+            const token = await UtilityService.createJWTSignature({user_id: user._id});
             return {
                 user, token
             }

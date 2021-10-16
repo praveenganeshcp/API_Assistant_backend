@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
+import { IUser } from "../../models/user";
 import { UtilityService } from "../../services/utility.service";
 import { accountService } from "./service";
 
 export async function createAccount(request: Request, response: Response) {
     try {
         let { username, mailId, password } = request.body;
-        const newUser = await accountService.createUserAccount(username, mailId, password);
-        const token = UtilityService.createJWTSignature({user_id: newUser?._id});
+        const newUser = await accountService.createUserAccount(username, mailId, password) as IUser;
+        const token = await UtilityService.createJWTSignature({user_id: newUser?._id});
         response.status(201).json({success: true, result: {user: newUser, token}});
     }
     catch(err) {

@@ -5,4 +5,5 @@ export interface IUser {
     hashed_password: string;
     created_on: Date;
     updated_on: Date | null;
+    last_login: Date | null;
 }

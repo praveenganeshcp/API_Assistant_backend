@@ -2,6 +2,11 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import fs from 'fs';
 import path from 'path';
+import { DaoService } from '../dao/dao';
+import { IUser } from '../models/user';
+import { COLLECTIONS } from '../constants';
+
+const daoService = new DaoService();
 
 export class UtilityService {
 
@@ -9,7 +14,10 @@ export class UtilityService {
         return process.env[field] as string;
     }
 
-    static createJWTSignature(payload: any) {
+    static async createJWTSignature(payload: {user_id: string}) {
+        await daoService.updateOne<IUser>(COLLECTIONS.USERS, {_id: payload.user_id}, {$set:
+            {last_login: new Date()}
+        });
         return jwt.sign(payload, this.getEnvProp('JWT_SECRET'), {expiresIn: '1h'});
     }
 
