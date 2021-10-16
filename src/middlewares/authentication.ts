@@ -17,7 +17,12 @@ export async function authenticationMiddleware(req: Request, res: Response, next
         token = token.split(' ')[1];
         let payload = UtilityService.verifyJWTSignature(token);
         console.log(payload);
-        req.user = await daoService.find<IUser>(COLLECTIONS.USERS, {_id: payload.user_id}) as IUser;
+        const user = await daoService.find<IUser>(COLLECTIONS.USERS, {_id: payload.user_id}) as IUser;
+        if(user == null) {
+            res.status(400).json({success: false, message: "Invalid user"});    
+            return;
+        }
+        req.user = user;
         next();
     }
     catch(err) {
