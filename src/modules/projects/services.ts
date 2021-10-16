@@ -31,7 +31,13 @@ async function createProject(userId: string, projectName: string) {
 
 async function fetchProjectsByUserId(userId: string) {
     try {
-        let projectsCreatedByUser = await daoService.findMany<IProject>(COLLECTIONS.PROJECTS, {user_id: userId});
+        let projectsCreatedByUser = await daoService.aggregate<IProject>(COLLECTIONS.PROJECTS, [
+            {$match:{user_id: userId}},
+            {$lookup:{localField: '_id', foreignField: 'project_id', from: 'project_keys', as:'auth'}},
+            {$addFields: {authObj: {$first:"$auth"}}},
+            {$addFields: {token:"$authObj.token"}},
+            {$project: {token:1, name:1, created_on:1}}
+        ]);
         return projectsCreatedByUser;
     }
     catch(err) {
