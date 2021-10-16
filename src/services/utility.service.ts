@@ -6,7 +6,6 @@ import { DaoService } from '../dao/dao';
 import { IUser } from '../models/user';
 import { COLLECTIONS } from '../constants';
 
-const daoService = new DaoService();
 
 export class UtilityService {
 
@@ -15,6 +14,7 @@ export class UtilityService {
     }
 
     static async createJWTSignature(payload: {user_id: string}) {
+        const daoService = new DaoService();
         await daoService.updateOne<IUser>(COLLECTIONS.USERS, {_id: payload.user_id}, {$set:
             {last_login: new Date()}
         });
