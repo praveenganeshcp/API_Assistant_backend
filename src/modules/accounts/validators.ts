@@ -7,11 +7,17 @@ const daoService = new DaoService();
 export const signupValidator = checkSchema({
     username: {
         in: ['body'],
-        isString: true,
+        isString: {
+            negated: false,
+            errorMessage: "Username must be a string value"
+        }
     },
     mailId: {
         in: ['body'],
-        isEmail: true,
+        isEmail: {
+            negated: false,
+            errorMessage: "Invalid Email-ID value"
+        },
         custom: {
             options: async (value: string) => {
                 let user = await daoService.find<IUser>(COLLECTIONS.USERS, {mailId: value});
@@ -24,7 +30,10 @@ export const signupValidator = checkSchema({
     },
     password: {
         in: ['body'],
-        isStrongPassword: true,
+        isStrongPassword: {
+            negated: false,
+            errorMessage: "Password is weak. It must contain atleast one upper, one lower and one special character"
+        },
     },
 })
 
@@ -45,5 +54,18 @@ export const loginValidator = checkSchema({
     password: {
         in: ['body'],
         isStrongPassword: true,
+    }
+})
+
+export const changePasswordValidator = checkSchema({
+    oldPassword: {
+        in: ['body'],
+        isString: true,
+        errorMessage: "Invalid value for oldPassword field",
+    },
+    newPassword: {
+        in: ['body'],
+        isString: true,
+        errorMessage: "Invalid value for newPassword field",
     }
 })

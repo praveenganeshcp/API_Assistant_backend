@@ -1,6 +1,11 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { raw } from 'express';
+import fs from 'fs';
+import path from 'path';
+import { DaoService } from '../dao/dao';
+import { IUser } from '../models/user';
+import { COLLECTIONS } from '../constants';
+
 
 export class UtilityService {
 
@@ -8,8 +13,12 @@ export class UtilityService {
         return process.env[field] as string;
     }
 
-    static createJWTSignature(payload: any) {
-        return jwt.sign(payload, this.getEnvProp('JWT_SECRET'));
+    static async createJWTSignature(payload: {user_id: string}) {
+        const daoService = new DaoService();
+        await daoService.updateOne<IUser>(COLLECTIONS.USERS, {_id: payload.user_id}, {$set:
+            {last_login: new Date()}
+        });
+        return jwt.sign(payload, this.getEnvProp('JWT_SECRET'), {expiresIn: '1h'});
     }
 
     static verifyJWTSignature(token: string): JwtPayload {
@@ -22,5 +31,14 @@ export class UtilityService {
 
     static async verifyPasswordHash(rawPassword: string, hashedPassword: string): Promise<boolean> {
         return bcrypt.compare(rawPassword, hashedPassword);
+    }
+
+    static folderSetup() {
+        let cwd = process.cwd();
+        let storagePath = path.join(cwd, 'storage');
+        if(!fs.existsSync(storagePath)) {
+            console.log('creating storage folder');
+            fs.mkdirSync(storagePath);
+        }
     }
 }

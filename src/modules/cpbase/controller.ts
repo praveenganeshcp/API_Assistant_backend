@@ -1,88 +1,67 @@
 import { Request, Response } from "express";
-import { validationResult } from "express-validator";
 import { MongoServerError, ObjectId } from "mongodb";
-import { DaoService } from "../../dao/dao";
 import { DbService } from "../../dao/db";
 import { ICpBaseRequest } from "../../models/base-request";
-import fs from 'fs/promises';
-import path from 'path';
+import { UtilityService } from "../../services/utility.service";
+import { cpBaseService } from "./services";
 
-export async function cpBaseFunction(req: Request, response: Response) {
+export async function createAccountCpBase(req: Request, response: Response) {
     try {
-    
-        let project_id = req.headers['project_auth'];
+        let projectId = req.headers['project_auth'] as string;
+        let user = req.body.user;
+        let result = await cpBaseService.createAccount(projectId, user);
+        response.status(201).json({success: true, result});
+    }
+    catch(err: any) {
+        console.error(err);
+        if(err.existingMailId) {
+            response.status(400).json({success: false, message: err.existingMailId});
+            return;
+        }
+        response.status(500).json({success: false, message: "Internal server error"});
+    }
+}
 
+export async function cpbaseLogin(req: Request, res: Response) {
+    try {
+        let project_id = req.headers['project_auth'];
         let client = await DbService.getClient();
         let db = client.db('project-'+project_id);
 
-        const { collectionName, action, data } = req.body as ICpBaseRequest;
-        let collection = db.collection(collectionName);
+        let user = req.body.user;
+        let { mailId, password } = user;
 
-        let result;
-
-        // find and fineOne  
-        if(action == 'findOne') {
-            console.log('Running findOne operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data);
+        let collection = db.collection('users');
+        let existingUser = await collection.findOne({mailId});
+        if(!existingUser) {
+            res.status(400).json({success: false, message: "MailId not registered"});
+            client.close();
+            console.log('connection closed');
+            return;
         }
-        else if(action == 'find') {
-            console.log('Running findMany operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data).toArray();
+        let isPasswordSame = await UtilityService.verifyPasswordHash(password, existingUser.hashed_password);
+        if(isPasswordSame == false) {
+            res.status(400).json({success: false, message: "Incorrect password"});
+            client.close();
+            console.log('connection closed');
+            return;
         }
-
-        // insertOne and many
-        else if(action == 'insertOne') {
-            data['_id'] = new ObjectId().toHexString();
-            console.log('Running insertOne operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data);
-        }
-        else if(action == 'insertMany') {
-            data.forEach((record: any) => {
-                record['_id'] = new ObjectId().toHexString();
-            })
-            console.log('Running insertMany operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data);
-        }
-
-        // update one and many
-        else if(action == 'updateOne') {
-            console.log('Running updateOne operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data.filter, data.update);
-        }
-        else if(action == 'updateMany') {
-            console.log('Running updateMany operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data.filter, data.update);
-        }
-
-        // aggregate
-        else if(action == 'aggregate') {
-            console.log('Running aggregate operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data).toArray();
-        }
-
-        // delete one and many options
-        else if(action == 'deleteOne') {
-            console.log('Running deleteOne operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data);
-        }
-        else if(action == 'deleteMany') {
-            console.log('Running deleteMany operation ...');
-            console.log(JSON.stringify(data, undefined, 3));
-            result = await collection[action](data);
-        }
-
+        res.json({success: true, result: existingUser});
         client.close();
-        console.log('DB connection closed');
-        response.json({success: true, result});
-        
+        console.log('connection closed');
+    }
+    catch(err) {
+        console.error(err);
+        res.status(500).json({success: false, message: "Internal server error"});
+    }
+}
+
+export async function cpBaseGlobal(req: Request, response: Response) {
+    try {
+        let projectId = req.headers['project_auth'] as string;
+        const { collectionName, action, data } = req.body as ICpBaseRequest;
+        let result = await cpBaseService.executeQueries(projectId, collectionName, action, data);
+        response.json({success: true, result});   
     }
     catch(err) {
         console.error(err);
@@ -96,14 +75,8 @@ export async function cpBaseFunction(req: Request, response: Response) {
 
 export async function fetchCollections(request: Request, response: Response) {
     try {
-        let project_auth = request.headers['project_auth'];
-        let dbName = 'project-'+project_auth;
-        const dbClient = await DbService.getClient();
-        console.log('New client created');
-        const db = dbClient.db(dbName);
-        let collectionNames = await (await db.listCollections().toArray()).map(collection => collection.name);
-        dbClient.close();
-        console.log('connection closed');
+        let projectId = request.headers['project_auth'] as string;
+        const collectionNames = await cpBaseService.fetchProjectCollectionNames(projectId);
         response.json({success: true, result: collectionNames});
     }
     catch(err) {
@@ -116,19 +89,70 @@ export async function cpBaseStorage(request: Request, response: Response) {
     response.status(201).json({success: true, path: request.file?.path})
 }
 
-export async function fetchDirectories(request: Request, response: Response) {
+export async function fetchFileSystem(request: Request, response: Response) {
     try {
         let requestedPath = request.query.path as string;
-        if(!requestedPath) {
-            requestedPath = '/';
-        }
-        let project_id = request.headers['project_auth'] as string;
-        let currentPath = path.join(process.cwd(), 'storage', project_id, ...requestedPath.split('/'));
-        let result = await (await fs.readdir(currentPath, {withFileTypes: true})).map(result => ({name: result.name, isFile: result.isFile()}));
+        let projectId = request.headers['project_auth'] as string;
+        let result = await cpBaseService.fetchFileSystem(projectId, requestedPath);
         response.json({success: true, result})
     }
-    catch(err) {
+    catch(err: any) {
+        if(err.code == 'ENOENT') {
+            response.status(400).json({success: false, message: "Requested path does not exists in the filesystem"});
+            return;
+        }
         console.error(err);
         response.status(500).json({success: false, message: "Internal server error"});
+    }
+}
+
+export async function fetchObjectStats(req: Request, res: Response) {
+    try {
+        let projectId: string = req.headers['project_auth'] as string;
+        let objectPath = req.query.path as string;
+        let result = await cpBaseService.fetchObjectStat(projectId, objectPath);
+        res.json({success: true, result});
+    }
+    catch(err: any) {
+        console.error(err);
+        if(err.errMsg) {
+            res.status(400).json({success: false, message: "Object path does not exists"});
+            return;
+        }
+        res.status(500).json({success: false, message: "Internal server error"});
+    }
+}
+
+export async function createDirectory(req: Request, res: Response) {
+    try {
+        let projectId: string = req.headers['project_auth'] as string;
+        let { rootPath, dirName } = req.body;
+        await cpBaseService.createDirectory(projectId, rootPath, dirName);
+        res.json({success: true, result: "Directory created successfully"});
+    }
+    catch(err: any) {
+        if(err.errMsg) {
+            res.status(400).json({success: false, message: err.errMsg});
+            return;
+        }
+        console.error(err);
+        res.status(500).json({success: false, message: "Internal server error"});
+    }
+}
+
+export async function removeObject(req: Request, res: Response) {
+    try {
+        let projectId: string = req.headers['project_auth'] as string;
+        let path = req.query.path as string;
+        await cpBaseService.removeObject(projectId, path);
+        res.json({success: true, result: "Object deleted"});
+    }
+    catch(err: any) {
+        console.error(err);
+        if(err.errMsg) {
+            res.status(400).json({success: false, message: err.errMsg});
+            return;
+        }
+        res.status(500).json({success: false, message: "Internal server error"});
     }
 }

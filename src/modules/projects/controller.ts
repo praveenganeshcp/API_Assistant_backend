@@ -1,32 +1,41 @@
 import { Request, Response } from "express";
-import { validationResult } from "express-validator";
-import { ObjectId } from "mongodb";
 import { COLLECTIONS } from "../../constants";
 import { DaoService } from "../../dao/dao";
 import { IProject } from "../../models/project";
+import { projectService } from "./services";
 
 const daoService = new DaoService();
 
 export async function createProject(request: Request, response: Response) {
     try {
-        let validationErrors = validationResult(request);
-        if(validationErrors.isEmpty()) {
-            let newProject: IProject = {
-                _id: new ObjectId().toHexString(),
-                user_id: request.user._id as string,
-                name: request.body.name,
-                created_on: new Date(),
-                updated_on: null
-            }
-            await daoService.insert(COLLECTIONS.PROJECTS, newProject);
-            response.json({success: true, result: newProject});    
-        }
-        else {
-            response.status(400).json({success: false, message: validationErrors});
-        }
+        let newProject: IProject = await projectService.createProject(request.user._id, request.body.name);
+        response.json({success: true, result: newProject});    
     }
     catch(err) {
+        console.error(err);
         response.status(500).json({success: false, message: "Internal server error"});
     }
-    
+}
+
+export async function fetchProjects(request: Request, response: Response) {
+    try {
+        let userId = request.user._id;
+        let projectsCreatedByUser = await projectService.fetchProjectsByUserId(userId);
+        response.json({success: true, result: projectsCreatedByUser});
+    }
+    catch(err) {
+        console.error(err);
+        response.status(500).json({success: false, message: "Internal server error"});
+    }   
+}
+
+export async function generateProjectAPIKey(request: Request, response: Response) {
+    try {
+        let projectKey = await projectService.generateProjectAPIKey(request.body.projectId);
+        response.json({success: true, result: projectKey})
+    }
+    catch(err) {
+        console.error(err);
+        response.status(500).json({success: false, message: "Internal server error"});
+    }
 }
